@@ -278,3 +278,14 @@ if submitted:
         f"Estimasi gaji (berdasarkan pendidikan & pengalaman): "
         f"Rp {df['estimated_salary'].iloc[0]:,.0f}"
     )
+    # Rekomendasi training hour
+if y_proba_res < 0.33:
+    training_recommendation = "Low – tidak perlu pelatihan tambahan saat ini."
+elif y_proba_res < 0.66:
+    training_recommendation = "Medium – disarankan pelatihan pengembangan keterampilan lanjutan."
+else:
+    training_recommendation = "High – sangat disarankan pelatihan intensif (soft skill & career development)."
+
+st.warning("📌 Rekomendasi Training Hour:")
+st.write(f"💡 Kategori risiko: **{'Low' if y_proba_res < 0.33 else 'Medium' if y_proba_res < 0.66 else 'High'}**")
+st.write(f"🕒 Rekomendasi jam pelatihan: {training_recommendation}")
