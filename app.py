@@ -72,7 +72,7 @@ def classes_or_fallback(col, default):
         ).classes_
     )
 
-city_options = classes_or_fallback("city", list(city_cdi_map.keys()) or ["city_103"])
+city_options = classes_or_fallback("city", sorted(list(city_cdi_map.keys()) or ["city_103"]))
 gender_options = classes_or_fallback("gender", ["Male", "Female", "Other"])
 relevent_exp_options = classes_or_fallback("relevent_experience", ["Has relevent experience", "No relevent experience"])
 enrolled_uni_options = classes_or_fallback("enrolled_university", ["no_enrollment", "Full time course", "Part time course"])
