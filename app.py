@@ -126,7 +126,7 @@ with col1:
 
 with col2:
     cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
-    st.metric(label="City Development Index (CDI)", value=f"{cdi_value:.3f}")
+    st.text_input("City Development Index (CDI)", value=f"{cdi_value:.3f}", disabled=True)
     relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options, key="relevent_experience")
     major = st.selectbox("Jurusan", major_options, key="major_discipline")
 
