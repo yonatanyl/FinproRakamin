@@ -31,9 +31,7 @@ def load_feature_columns(path: str):
 
 @st.cache_resource
 def load_imputation(path: str):
-    if Path(path).exists():
-        return joblib.load(path)
-    return {}
+    return joblib.load(path) if Path(path).exists() else {}
 
 @st.cache_data
 def load_city_mapping(path: str):
@@ -66,11 +64,7 @@ if pipeline_model is None or not model_cols:
 # 3. List opsi untuk widget                                           #
 # ------------------------------------------------------------------ #
 def classes_or_fallback(col, default):
-    return list(
-        label_encoders.get(
-            col, type("dummy", (object,), {"classes_": default})
-        ).classes_
-    )
+    return list(label_encoders.get(col, type("dummy", (object,), {"classes_": default})) .classes_)
 
 city_options = classes_or_fallback("city", sorted(list(city_cdi_map.keys()) or ["city_103"]))
 gender_options = classes_or_fallback("gender", ["Male", "Female", "Other"])
@@ -92,7 +86,7 @@ salary_mapping = {
     "Phd": 16_000_000,
 }
 
-def parse_experience(exp: str | float | int):
+def parse_experience(exp):
     if pd.isna(exp):
         return np.nan
     exp = str(exp).strip()
@@ -105,15 +99,15 @@ def parse_experience(exp: str | float | int):
     except ValueError:
         return np.nan
 
-def estimate_salary(level: str, exp_numeric: float):
+def estimate_salary(level, exp_numeric):
     base = salary_mapping.get(level, 0)
     if pd.isna(exp_numeric) or base == 0:
         return np.nan
     if exp_numeric <= 1:
         return base
-    if 2 <= exp_numeric <= 5:
+    elif 2 <= exp_numeric <= 5:
         return base * 1.10
-    if 6 <= exp_numeric <= 10:
+    elif 6 <= exp_numeric <= 10:
         return base * 1.20
     return base * 1.30
 
