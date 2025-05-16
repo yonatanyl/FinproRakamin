@@ -355,15 +355,16 @@ if submitted:
         📌 Dengan redistribusi ini, proporsi anggaran pelatihan kini **lebih mencerminkan prioritas retensi**.
         """)
         import shap
-        # --- SHAP untuk pipeline ---
-        explainer = shap.Explainer(pipeline_model, df_model)
-        shap_values = explainer(df_model)
         
-        # Ambil row prediksi yang barusan (pertama dan satu-satunya di batch ini)
-        shap_row = shap_values[0].values
+        # KernelExplainer bisa untuk semua pipeline, walau lebih lambat
+        explainer = shap.KernelExplainer(pipeline_model.predict_proba, df_model)
+        shap_values = explainer.shap_values(df_model, nsamples=100)
         
-        # Rank fitur berdasar kontribusi absolut (besar pengaruh)
-        top_idx = np.argsort(np.abs(shap_row))[::-1][:3]  # top 3 fitur
+        # Untuk binary classification, biasanya shap_values[1] = proba kelas 1 (resign)
+        shap_row = shap_values[1][0]  # baris pertama
+        
+        # Top 3 feature influence
+        top_idx = np.argsort(np.abs(shap_row))[::-1][:3]
         top_feats = [(df_model.columns[i], shap_row[i]) for i in top_idx]
         
         shap_markdown = "#### 🧠 Alasan Utama Prediksi:\n"
