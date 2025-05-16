@@ -138,6 +138,17 @@ def estimate_salary(level, exp_numeric):
 # ------------------------------------------------------------------ #
 # 5. UI : Form input (REFINED)                                       #
 # ------------------------------------------------------------------ #
+
+# Button untuk tampilkan mapping kota & CDI
+if st.button("📜 Lihat Daftar Kota & CDI"):
+    with st.modal("Daftar City dan City Development Index (CDI)"):
+        # Ubah mapping ke DataFrame agar mudah dibaca
+        city_cdi_df = pd.DataFrame([
+            {"City": k, "CDI": v}
+            for k, v in city_cdi_map.items()
+        ]).sort_values("City")
+        st.dataframe(city_cdi_df, hide_index=True, use_container_width=True)
+        st.info("Pilih kode kota yang sesuai pada dropdown input.")
 # ------------------------ UI INPUTS (ALL OUTSIDE FORM) ------------------------
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
 st.markdown("## 📝 Input Data Karyawan")
