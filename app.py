@@ -228,9 +228,9 @@ if submitted:
             st.markdown(f"<h2 style='color:white'>{y_proba_res:.2%}</h2>", unsafe_allow_html=True)
     
         with col2:
-            risk_color_emoji = "🟢" if risk_level == "Low" else "🟡" if risk_level == "Medium" else "🔴"
+            risk_color_emoji = "🟢" if risk_level == "Low Risk" else "🟡" if risk_level == "Medium Risk" else "🔴"
             st.markdown("#### 🧩 Segmentasi Risiko")
-            st.markdown(f"<h4 style='color:white'>{risk_color_emoji} <b>{risk_level} Risk</b></h4>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='color:white'>{risk_color_emoji} <b>{risk_level}</b></h4>", unsafe_allow_html=True)
     
         st.markdown("---")
         st.markdown("#### ⏱️ Rekomendasi Tindakan")
