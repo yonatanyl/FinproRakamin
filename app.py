@@ -175,7 +175,9 @@ with st.expander("📋 Lihat Ringkasan Input (Live Update)"):
         "Status Universitas": enrolled_uni,
         "Last New Job": last_new_job_str
     }]))
-
+    
+if prediksi_btn:
+    st.success("Prediksi berjalan! (disini lanjutkan proses model dan hasilnya)")
 # ----------------------- BUTTON PREDIKSI ------------------------
 st.markdown("---")
 prediksi_btn = st.button("📊 Prediksi")
