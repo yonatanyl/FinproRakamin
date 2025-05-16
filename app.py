@@ -142,12 +142,7 @@ st.title("💼 Prediksi Kemungkinan Karyawan Resign")
 st.markdown("## 📝 Form Input Data Karyawan")
 st.divider()
 
-# 1. Selectbox Kota di luar form agar live-update
-city = st.selectbox(
-    "Kota",
-    city_options,
-    help="Pilih kota domisili karyawan."
-)
+city = st.selectbox("Kota", city_options, help="Pilih kota domisili karyawan.")
 cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
 st.text_input(
     "City Development Index (CDI)",
@@ -168,20 +163,22 @@ with st.form("prediksi_resign_form"):
         major = st.selectbox("Jurusan", major_options, help="Jurusan pendidikan terakhir.")
         last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options, help="Waktu terakhir kali pindah kerja.")
     st.markdown("---")
-    with st.expander("📋 Lihat Ringkasan Input"):
-        st.table(pd.DataFrame([{
-            "Kota": city,
-            "CDI": f"{cdi_value:.3f}",
-            "Jenis Kelamin": gender,
-            "Pendidikan": education_level,
-            "Jurusan": major,
-            "Pengalaman": exp_str,
-            "Pengalaman Relevan": relevent_exp,
-            "Status Universitas": enrolled_uni,
-            "Last New Job": last_new_job_str
-        }]))
     submitted = st.form_submit_button("📊 Prediksi")
 st.divider()
+
+# ------- RINGKASAN INPUT DI LUAR FORM, SELALU LIVE -------------
+with st.expander("📋 Lihat Ringkasan Input (Live)"):
+    st.table(pd.DataFrame([{
+        "Kota": city,
+        "CDI": f"{cdi_value:.3f}",
+        "Jenis Kelamin": gender,
+        "Pendidikan": education_level,
+        "Jurusan": major,
+        "Pengalaman": exp_str,
+        "Pengalaman Relevan": relevent_exp,
+        "Status Universitas": enrolled_uni,
+        "Last New Job": last_new_job_str
+    }]))
 
 # ------------------------------------------------------------------ #
 # 6. Pra-proses & Prediksi                                           #
