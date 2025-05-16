@@ -206,15 +206,8 @@ if submitted:
     y_pred = pipeline_model.predict(df_model)[0]
     y_proba_res = pipeline_model.predict_proba(df_model)[0][1]
 
-with st.expander("📊 Lihat Hasil Prediksi"):
-    st.subheader("📊 Hasil Prediksi")
-    if y_pred == 1:
-        st.error(f"⚠️  Karyawan diprediksi **RESIGN** – probabilitas: {y_proba_res:.2%}")
-    else:
-        st.success(f"✅  Karyawan diprediksi **TIDAK resign** – probabilitas bertahan: {1 - y_proba_res:.2%}")
-
-    st.info(f"💰 Estimasi gaji: Rp {df['estimated_salary'].iloc[0]:,.0f}")
-
-    st.warning("📌 Rekomendasi Training Hour:")
-    st.write(f"💡 Kategori risiko: **{'Low' if y_proba_res < 0.33 else 'Medium' if y_proba_res < 0.66 else 'High'}**")
-    st.write(f"🕒 Rekomendasi jam pelatihan: {training_recommendation}")
+with st.expander("📊 Lihat Detail Hasil Prediksi"):
+    st.metric("Probabilitas Resign", f"{y_proba_res:.2%}")
+    st.metric("Estimasi Gaji", f"Rp {df['estimated_salary'].iloc[0]:,.0f}")
+    st.markdown(f"### {'🟢' if y_proba_res < 0.33 else '🟡' if y_proba_res < 0.66 else '🔴'} **Risiko: {risk_level}**")
+    st.write(f"🕒 Training Rekomendasi: {training_recommendation}")
