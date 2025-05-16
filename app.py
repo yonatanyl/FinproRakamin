@@ -218,8 +218,21 @@ if submitted:
 
     risk_color = "🟢" if risk_level == "Low" else "🟡" if risk_level == "Medium" else "🔴"
 
-    with st.expander("📊 Lihat Detail Prediksi"):
-        st.metric("Probabilitas Resign", f"{y_proba_res:.2%}")
-        st.metric("Estimasi Gaji", f"Rp {df['estimated_salary'].iloc[0]:,.0f}")
-        st.markdown(f"### {risk_color} **SEGMENTASI : {risk_level}**")
-        st.info(f"🕒 Rekomendasi Jam Pelatihan: {training_recommendation}")
+    modal_html = f"""
+<div style='
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    margin-top: 20px;
+'>
+    <h3>{'⚠️ Karyawan RESIGN' if y_pred==1 else '✅ Karyawan TIDAK Resign'}</h3>
+    <p><strong>Probabilitas:</strong> {y_proba_res:.2%}</p>
+    <p><strong>Estimasi Gaji:</strong> Rp {df['estimated_salary'].iloc[0]:,.0f}</p>
+    <p><strong>SEGMENTASI:</strong> {risk_color} {risk_level}</p>
+    <p><strong>Rekomendasi:</strong> {training_recommendation}</p>
+</div>
+"""
+
+st.markdown(modal_html, unsafe_allow_html=True)
