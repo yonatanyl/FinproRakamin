@@ -136,29 +136,82 @@ def estimate_salary(level, exp_numeric):
     return base * 1.30
 
 # ------------------------------------------------------------------ #
-# 5. UI : Form input                                                 #
+# 5. UI : Form input (REFINED)                                       #
 # ------------------------------------------------------------------ #
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
+st.markdown("## 📝 Form Input Data Karyawan")
+st.divider()
 
-col1, col2, col3 = st.columns(3)
+with st.form("prediksi_resign_form"):
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        city = st.selectbox(
+            "Kota",
+            city_options,
+            help="Pilih kota domisili karyawan."
+        )
+        gender = st.selectbox(
+            "Jenis Kelamin",
+            gender_options,
+            help="Pilih gender karyawan."
+        )
+        education_level = st.selectbox(
+            "Tingkat Pendidikan",
+            education_options,
+            help="Pilih pendidikan terakhir."
+        )
+        exp_str = st.selectbox(
+            "Pengalaman Kerja (tahun)",
+            experience_options,
+            help="Total tahun pengalaman kerja."
+        )
+    with col2:
+        cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
+        st.text_input(
+            "City Development Index (CDI)",
+            value=f"{cdi_value:.3f}",
+            disabled=True,
+            help="Indeks pembangunan kota (otomatis sesuai kota)."
+        )
+        relevent_exp = st.selectbox(
+            "Pengalaman Relevan",
+            relevent_exp_options,
+            help="Apakah pengalaman kerja relevan dengan posisi?"
+        )
+        major = st.selectbox(
+            "Jurusan",
+            major_options,
+            help="Jurusan pendidikan terakhir."
+        )
+    with col3:
+        last_new_job_str = st.selectbox(
+            "Terakhir Ganti Pekerjaan",
+            last_new_job_options,
+            help="Waktu terakhir kali pindah kerja."
+        )
+        enrolled_uni = st.selectbox(
+            "Status Universitas",
+            enrolled_uni_options,
+            help="Status universitas saat ini."
+        )
+    st.markdown("---")
+    with st.expander("📋 Lihat Ringkasan Input"):
+        st.table(pd.DataFrame([{
+            "Kota": city,
+            "CDI": f"{cdi_value:.3f}",
+            "Jenis Kelamin": gender,
+            "Pendidikan": education_level,
+            "Jurusan": major,
+            "Pengalaman": exp_str,
+            "Pengalaman Relevan": relevent_exp,
+            "Status Universitas": enrolled_uni,
+            "Last New Job": last_new_job_str
+        }]))
 
-with col1:
-    city = st.selectbox("Kota", city_options, key="city")
-    gender = st.selectbox("Jenis Kelamin", gender_options, key="gender")
-    education_level = st.selectbox("Tingkat Pendidikan", education_options, key="education_level")
-    exp_str = st.selectbox("Pengalaman Kerja (tahun)", experience_options, key="experience")
+    submitted = st.form_submit_button("📊 Prediksi")
 
-with col2:
-    cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
-    st.text_input("City Development Index (CDI)", value=f"{cdi_value:.3f}", disabled=True)
-    relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options, key="relevent_experience")
-    major = st.selectbox("Jurusan", major_options, key="major_discipline")
-
-with col3:
-    last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options, key="last_new_job")
-    enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options, key="enrolled_university")
-
-submitted = st.button("Prediksi")
+st.divider()
 
 
 # ------------------------------------------------------------------ #
@@ -208,13 +261,13 @@ if submitted:
 
     if y_proba_res < 0.45:
         risk_level = "Low Risk"
-        training_recommendation = "Low Risk – tidak perlu pelatihan tambahan saat ini."
+        training_recommendation = "Low Risk – 15% Segmentasi Alokasi Budget."
     elif y_proba_res < 0.70:
         risk_level = "Medium Risk"
-        training_recommendation = "Medium Risk – disarankan pelatihan pengembangan keterampilan lanjutan."
+        training_recommendation = "Medium Risk – 35% Segmentasi Alokasi Budget."
     else:
         risk_level = "High Risk"
-        training_recommendation = "High Risk – sangat disarankan pelatihan intensif (soft skill & career development)."
+        training_recommendation = "High Risk – 50% Segmentasi Alokasi Budget."
 
 # ---- ANIMASI/NOTIFIKASI INTERAKTIF ----
     if y_pred == 1:
@@ -292,7 +345,7 @@ if submitted:
 
     render_progress_bar(y_proba_res * 100, risk_level)
     
-    # ---- (OPTIONAL) INSIGHT TAMBAHAN T&D ----
+    # ----INSIGHT TAMBAHAN T&D ----
     with st.expander("📈 Insight Strategis Training & Development"):
         st.markdown("""
         - 🔴 **High Risk**: naik **+16.7 pp** → fokus pada upaya preventif intensif  
@@ -301,7 +354,3 @@ if submitted:
     
         📌 Dengan redistribusi ini, proporsi anggaran pelatihan kini **lebih mencerminkan prioritas retensi**.
         """)
-
-
-
-
