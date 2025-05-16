@@ -66,13 +66,26 @@ if pipeline_model is None or not model_cols:
 def classes_or_fallback(col, default):
     return list(label_encoders.get(col, type("dummy", (object,), {"classes_": default})) .classes_)
 
+def sort_experience(values):
+    def sort_key(val):
+        if val == "<1":
+            return 0
+        elif val == ">20":
+            return 21
+        try:
+            return int(val)
+        except:
+            return 999
+    return sorted(values, key=sort_key)
+
 city_options = classes_or_fallback("city", sorted(list(city_cdi_map.keys()) or ["city_103"]))
 gender_options = classes_or_fallback("gender", ["Male", "Female", "Other"])
 relevent_exp_options = classes_or_fallback("relevent_experience", ["Has relevent experience", "No relevent experience"])
 enrolled_uni_options = classes_or_fallback("enrolled_university", ["no_enrollment", "Full time course", "Part time course"])
 education_options = classes_or_fallback("education_level", ["Graduate", "Masters", "High School", "Phd", "Primary School"])
 major_options = classes_or_fallback("major_discipline", ["STEM", "Business Degree", "Arts", "Humanities", "No Major", "Other"])
-experience_options = classes_or_fallback("experience", ["<1"] + [str(i) for i in range(1, 21)] + [">20"])
+experience_classes = classes_or_fallback("experience", ["<1"] + [str(i) for i in range(1, 21)] + [">20"])
+experience_options = sort_experience(experience_classes)
 last_new_job_options = classes_or_fallback("last_new_job", ["never", "1", "2", "3", "4", ">4"])
 
 # ------------------------------------------------------------------ #
