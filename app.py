@@ -330,7 +330,7 @@ if prediksi_btn:  # <--- GANTI submitted -> prediksi_btn
     with st.expander("📈 Insight Strategis Training & Development"):
         st.markdown("""
         - 🔴 **High Risk**: naik **+16.7 pp** → fokus pada upaya preventif intensif  
-        - 🟡 **Medium Risk**: naik **+1.7 pp** → menjaga momentum pengembangan  
+        - 🟧 **Medium Risk**: naik **+1.7 pp** → menjaga momentum pengembangan  
         - 🟢 **Low Risk**: turun **–18.3 pp** → alokasi efisien karena risiko rendah  
     
         📌 Dengan redistribusi ini, proporsi anggaran pelatihan kini **lebih mencerminkan prioritas retensi**.
