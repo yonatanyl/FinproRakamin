@@ -78,11 +78,22 @@ def sort_experience(values):
             return 999
     return sorted(values, key=sort_key)
 
+def sort_education(values):
+    urutan = {
+        "Primary School": 0,
+        "High School": 1,
+        "Graduate": 2,
+        "Masters": 3,
+        "Phd": 4
+    }
+    return sorted(values, key=lambda x: urutan.get(x, 999))
+
 city_options = classes_or_fallback("city", sorted(list(city_cdi_map.keys()) or ["city_103"]))
 gender_options = classes_or_fallback("gender", ["Male", "Female", "Other"])
 relevent_exp_options = classes_or_fallback("relevent_experience", ["Has relevent experience", "No relevent experience"])
 enrolled_uni_options = classes_or_fallback("enrolled_university", ["no_enrollment", "Full time course", "Part time course"])
-education_options = classes_or_fallback("education_level", ["Graduate", "Masters", "High School", "Phd", "Primary School"])
+education_classes = classes_or_fallback("education_level", ["Graduate", "Masters", "High School", "Phd", "Primary School"])
+education_options = sort_education(education_classes)
 major_options = classes_or_fallback("major_discipline", ["STEM", "Business Degree", "Arts", "Humanities", "No Major", "Other"])
 experience_classes = classes_or_fallback("experience", ["<1"] + [str(i) for i in range(1, 21)] + [">20"])
 experience_options = sort_experience(experience_classes)
