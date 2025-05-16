@@ -135,6 +135,12 @@ def estimate_salary(level, exp_numeric):
         return base * 1.20
     return base * 1.30
 
+def natural_key(s):
+    # Extract angka dari string, biar urutannya city_1, city_2, ..., city_10
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('(\d+)', s)]
+
+# Sorting city_options pakai natural_key
+city_options_sorted = sorted(city_options, key=natural_key)
 # ------------------------------------------------------------------ #
 # 5. UI : Form input (REFINED)                                       #
 # ------------------------------------------------------------------ #
@@ -154,7 +160,7 @@ st.divider()
 
 col1, col2 = st.columns(2)
 with col1:
-    city = st.selectbox("Kota", city_options, help="Pilih kota domisili karyawan.")
+    city = st.selectbox("Kota", city_options_sorted, help="Pilih kota domisili karyawan.")
     cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
     st.text_input(
         "City Development Index (CDI)",
