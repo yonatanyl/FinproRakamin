@@ -161,12 +161,12 @@ with st.form("prediksi_resign_form"):
     with col1:
         gender = st.selectbox("Jenis Kelamin", gender_options, help="Pilih gender karyawan.")
         education_level = st.selectbox("Tingkat Pendidikan", education_options, help="Pilih pendidikan terakhir.")
+        enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options, help="Status universitas saat ini.")
         exp_str = st.selectbox("Pengalaman Kerja (tahun)", experience_options, help="Total tahun pengalaman kerja.")
     with col2:
         relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options, help="Apakah pengalaman kerja relevan dengan posisi?")
         major = st.selectbox("Jurusan", major_options, help="Jurusan pendidikan terakhir.")
         last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options, help="Waktu terakhir kali pindah kerja.")
-        enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options, help="Status universitas saat ini.")
     st.markdown("---")
     with st.expander("📋 Lihat Ringkasan Input"):
         st.table(pd.DataFrame([{
