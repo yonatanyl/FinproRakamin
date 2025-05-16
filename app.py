@@ -138,36 +138,32 @@ def estimate_salary(level, exp_numeric):
 # ------------------------------------------------------------------ #
 # 5. UI : Form input (REFINED)                                       #
 # ------------------------------------------------------------------ #
+# ------------------------ UI INPUTS (ALL OUTSIDE FORM) ------------------------
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
-st.markdown("## 📝 Form Input Data Karyawan")
+st.markdown("## 📝 Input Data Karyawan")
 st.divider()
 
-city = st.selectbox("Kota", city_options, help="Pilih kota domisili karyawan.")
-cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
-st.text_input(
-    "City Development Index (CDI)",
-    value=f"{cdi_value:.3f}",
-    disabled=True,
-    help="Indeks pembangunan kota (otomatis sesuai kota)."
-)
+col1, col2 = st.columns(2)
+with col1:
+    city = st.selectbox("Kota", city_options, help="Pilih kota domisili karyawan.")
+    cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
+    st.text_input(
+        "City Development Index (CDI)",
+        value=f"{cdi_value:.3f}",
+        disabled=True,
+        help="Indeks pembangunan kota (otomatis sesuai kota)."
+    )
+    gender = st.selectbox("Jenis Kelamin", gender_options)
+    education_level = st.selectbox("Tingkat Pendidikan", education_options)
+    major = st.selectbox("Jurusan", major_options)
+with col2:
+    enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options)
+    exp_str = st.selectbox("Pengalaman Kerja (tahun)", experience_options)
+    relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options)
+    last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options)
 
-with st.form("prediksi_resign_form"):
-    col1, col2 = st.columns(2)
-    with col1:
-        gender = st.selectbox("Jenis Kelamin", gender_options, help="Pilih gender karyawan.")
-        education_level = st.selectbox("Tingkat Pendidikan", education_options, help="Pilih pendidikan terakhir.")
-        enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options, help="Status universitas saat ini.")
-        exp_str = st.selectbox("Pengalaman Kerja (tahun)", experience_options, help="Total tahun pengalaman kerja.")
-    with col2:
-        relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options, help="Apakah pengalaman kerja relevan dengan posisi?")
-        major = st.selectbox("Jurusan", major_options, help="Jurusan pendidikan terakhir.")
-        last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options, help="Waktu terakhir kali pindah kerja.")
-    st.markdown("---")
-    submitted = st.form_submit_button("📊 Prediksi")
-st.divider()
-
-# ------- RINGKASAN INPUT DI LUAR FORM, SELALU LIVE -------------
-with st.expander("📋 Lihat Ringkasan Input (Live)"):
+# ----------------------- RINGKASAN INPUT DINAMIS ------------------------
+with st.expander("📋 Lihat Ringkasan Input (Live Update)"):
     st.table(pd.DataFrame([{
         "Kota": city,
         "CDI": f"{cdi_value:.3f}",
@@ -179,6 +175,10 @@ with st.expander("📋 Lihat Ringkasan Input (Live)"):
         "Status Universitas": enrolled_uni,
         "Last New Job": last_new_job_str
     }]))
+
+# ----------------------- BUTTON PREDIKSI ------------------------
+st.markdown("---")
+prediksi_btn = st.button("📊 Prediksi")
 
 # ------------------------------------------------------------------ #
 # 6. Pra-proses & Prediksi                                           #
