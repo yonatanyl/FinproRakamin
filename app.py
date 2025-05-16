@@ -117,25 +117,26 @@ def estimate_salary(level, exp_numeric):
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
 
 with st.form("prediction_form"):
-    col1, col2, col3 = st.columns(3)
+    ccol1, col2, col3 = st.columns(3)
 
-    with col1:
-        city = st.selectbox("Kota", city_options, key="city")
-        gender = st.selectbox("Jenis Kelamin", gender_options, key="gender")
-        education_level = st.selectbox("Tingkat Pendidikan", education_options, key="education_level")
-        exp_str = st.selectbox("Pengalaman Kerja (tahun)", experience_options, key="experience")
+with col1:
+    city = st.selectbox("Kota", city_options, key="city")
+    gender = st.selectbox("Jenis Kelamin", gender_options, key="gender")
+    education_level = st.selectbox("Tingkat Pendidikan", education_options, key="education_level")
+    exp_str = st.selectbox("Pengalaman Kerja (tahun)", experience_options, key="experience")
 
-    with col2:
-        cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
-        st.number_input("City Development Index (CDI)", 0.0, 1.0, cdi_value, step=0.001, format="%.3f", disabled=True)
-        relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options, key="relevent_experience")
-        major = st.selectbox("Jurusan", major_options, key="major_discipline")
+with col2:
+    cdi_value = float(city_cdi_map.get(city, DEFAULT_CDI_FALLBACK))
+    st.number_input("City Development Index (CDI)", value=cdi_value, step=0.001, format="%.3f", disabled=True, key="cdi_display")
+    relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options, key="relevent_experience")
+    major = st.selectbox("Jurusan", major_options, key="major_discipline")
 
-    with col3:
-        last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options, key="last_new_job")
-        enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options, key="enrolled_university")
+with col3:
+    last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options, key="last_new_job")
+    enrolled_uni = st.selectbox("Status Universitas", enrolled_uni_options, key="enrolled_university")
 
-    submitted = st.form_submit_button("Prediksi")
+submitted = st.button("Prediksi")
+
 
 # ------------------------------------------------------------------ #
 # 6. Pra-proses & Prediksi                                           #
