@@ -143,9 +143,9 @@ with st.expander("📜 Lihat Daftar Kota & CDI (klik untuk buka)", expanded=Fals
     city_cdi_df = pd.DataFrame([
         {"City": k, "CDI": v}
         for k, v in city_cdi_map.items()
-    ]).sort_values("City")
+    ]).sort_values("CDI", ascending=False)  # sort by CDI tertinggi
     st.dataframe(city_cdi_df, hide_index=True, use_container_width=True)
-    st.info("Pilih kode kota yang sesuai pada dropdown input.")
+    st.info("Tabel diurutkan dari CDI tertinggi ke terendah.")
 
 # ------------------------ UI INPUTS (ALL OUTSIDE FORM) ------------------------
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
