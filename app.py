@@ -216,8 +216,6 @@ if submitted:
         risk_level = "High Risk"
         training_recommendation = "High Risk – sangat disarankan pelatihan intensif (soft skill & career development)."
 
-    risk_color = "🟢" if risk_level == "Low" else "🟡" if risk_level == "Medium" else "🔴"
-
     with st.container():
         st.markdown("## 🔍 **Hasil Prediksi Karyawan**")
         st.markdown("---")
