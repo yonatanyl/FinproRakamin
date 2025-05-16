@@ -216,25 +216,69 @@ if submitted:
         risk_level = "High Risk"
         training_recommendation = "High Risk – sangat disarankan pelatihan intensif (soft skill & career development)."
 
-    with st.container():
-        st.markdown("## 🔍 **Hasil Prediksi Karyawan**")
-        st.markdown("---")
+# ---- ANIMASI/NOTIFIKASI INTERAKTIF ----
+    if y_pred == 1:
+        st.toast("⚠️ Karyawan diprediksi akan RESIGN!", icon="⚠️")
+    else:
+        st.toast("✅ Karyawan diprediksi TIDAK resign.", icon="✅")
     
-        # layout kolom 2 bagian: kiri = Probabilitas, kanan = Segmentasi
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
-            st.markdown("#### 📉 Probabilitas Resign")
-            st.markdown(f"<h2 style='color:white'>{y_proba_res:.2%}</h2>", unsafe_allow_html=True)
+    # ---- KARTU UTAMA HASIL PREDIKSI ----
+    risk_color = "#22c55e" if risk_level == "Low Risk" else "#facc15" if risk_level == "Medium Risk" else "#dc2626"
+    risk_emoji = "🟢" if risk_level == "Low Risk" else "🟡" if risk_level == "Medium Risk" else "🔴"
     
-        with col2:
-            risk_color_emoji = "🟢" if risk_level == "Low Risk" else "🟡" if risk_level == "Medium Risk" else "🔴"
-            st.markdown("#### 🧩 Segmentasi Risiko")
-            st.markdown(f"<h4 style='color:white'>{risk_color_emoji} <b>{risk_level}</b></h4>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="
+        background-color: #1e293b;
+        border-radius: 14px;
+        border-left: 8px solid {risk_color};
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        padding: 2rem 1.5rem 1rem 2rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    ">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-size: 18px; font-weight: bold; color: #fff;">📉 Probabilitas Resign</div>
+                <div style="font-size: 38px; font-weight: bold; color: {risk_color}; margin-top: 0.25em;">{y_proba_res:.2%}</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 18px; font-weight: bold; color: #fff;">🧩 Segmentasi Risiko</div>
+                <div style="font-size: 28px; font-weight: bold; color: {risk_color}; margin-top: 0.25em;">
+                    {risk_emoji} {risk_level}
+                </div>
+            </div>
+        </div>
+        <hr style="border: none; border-top: 2px solid #334155; margin: 1.3em 0;">
+        <div style="font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 0.7em;">
+            ⏱️ Rekomendasi Tindakan
+        </div>
+        <div style="
+            background: #334155; 
+            border-radius: 8px; 
+            padding: 0.8em 1.2em;
+            color: #e0eefa;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 0.5em;
+            ">
+            💡 {training_recommendation}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-        st.markdown("---")
-        st.markdown("#### ⏱️ Rekomendasi Tindakan")
-        st.success(f"💡 {risk_level} – {training_recommendation}")
+    # ---- PROGRESS BAR VISUAL ----
+    st.progress(int(y_proba_res * 100), text=f"Probabilitas Resign: {y_proba_res:.2%}")
+    
+    # ---- (OPTIONAL) INSIGHT TAMBAHAN T&D ----
+    with st.expander("📈 Insight Strategis Training & Development"):
+        st.markdown("""
+        - 🔴 **High Risk**: naik **+16.7 pp** → fokus pada upaya preventif intensif  
+        - 🟡 **Medium Risk**: naik **+1.7 pp** → menjaga momentum pengembangan  
+        - 🟢 **Low Risk**: turun **–18.3 pp** → alokasi efisien karena risiko rendah  
+    
+        📌 Dengan redistribusi ini, proporsi anggaran pelatihan kini **lebih mencerminkan prioritas retensi**.
+        """)
+
 
 
 
