@@ -162,7 +162,7 @@ with col2:
     relevent_exp = st.selectbox("Pengalaman Relevan", relevent_exp_options)
     last_new_job_str = st.selectbox("Terakhir Ganti Pekerjaan", last_new_job_options)
 
-# ----------------------- RINGKASAN INPUT DINAMIS ------------------------
+# RINGKASAN INPUT DINAMIS
 with st.expander("📋 Lihat Ringkasan Input (Live Update)"):
     st.table(pd.DataFrame([{
         "Kota": city,
@@ -175,17 +175,13 @@ with st.expander("📋 Lihat Ringkasan Input (Live Update)"):
         "Status Universitas": enrolled_uni,
         "Last New Job": last_new_job_str
     }]))
-    
-    if prediksi_btn:
-        st.success("Prediksi berjalan! (disini lanjutkan proses model dan hasilnya)")
-# ----------------------- BUTTON PREDIKSI ------------------------
-st.markdown("---")
-prediksi_btn = st.button("📊 Prediksi")
 
-# ------------------------------------------------------------------ #
-# 6. Pra-proses & Prediksi                                           #
-# ------------------------------------------------------------------ #
-if submitted:
+# BUTTON PREDIKSI
+st.markdown("---")
+prediksi_btn = st.button("📊 Prediksi")  # <--- INI YANG BENAR
+
+# 6. Pra-proses & Prediksi
+if prediksi_btn:  # <--- GANTI submitted -> prediksi_btn
     raw = {
         "city": city,
         "city_development_index": cdi_value,
@@ -237,7 +233,7 @@ if submitted:
         risk_level = "High Risk"
         training_recommendation = "High Risk – 50% Segmentasi Alokasi Budget."
 
-# ---- ANIMASI/NOTIFIKASI INTERAKTIF ----
+    # ---- ANIMASI/NOTIFIKASI INTERAKTIF ----
     if y_pred == 1:
         st.toast("⚠️ Karyawan diprediksi akan RESIGN!", icon="⚠️")
     else:
