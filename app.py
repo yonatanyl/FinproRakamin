@@ -223,8 +223,8 @@ if submitted:
         st.toast("✅ Karyawan diprediksi TIDAK resign.", icon="✅")
     
     # ---- KARTU UTAMA HASIL PREDIKSI ----
-    risk_color = "#22c55e" if risk_level == "Low Risk" else "#facc15" if risk_level == "Medium Risk" else "#dc2626"
-    risk_emoji = "🟢" if risk_level == "Low Risk" else "🟡" if risk_level == "Medium Risk" else "🔴"
+    risk_color = "#22c55e" if risk_level == "Low Risk" else "#ffb100" if risk_level == "Medium Risk" else "#dc2626"
+    risk_emoji = "🟢" if risk_level == "Low Risk" else "🟧" if risk_level == "Medium Risk" else "🔴"
     
     st.markdown(f"""
     <div style="
