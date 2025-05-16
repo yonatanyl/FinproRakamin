@@ -267,28 +267,28 @@ if submitted:
     """, unsafe_allow_html=True)
     
     # ---- PROGRESS BAR VISUAL ----
-def render_progress_bar(percentage, risk_level):
-    color = "#22c55e" if risk_level == "Low Risk" else "#ffb100" if risk_level == "Medium Risk" else "#dc2626"
-    st.markdown(f"""
-    <div style="margin-top:1em">
-        <div style="font-weight:600; color:#fff; margin-bottom:0.3em;">📉 Probabilitas Resign: {percentage:.2f}%</div>
-        <div style="background-color:#334155; border-radius:6px; height:24px; width:100%;">
-            <div style="
-                background-color:{color};
-                width:{percentage}%;
-                height:100%;
-                border-radius:6px;
-                text-align:right;
-                padding-right:10px;
-                color:white;
-                font-weight:600;
-                line-height:24px;
-            ">
-                {percentage:.0f}%
+    def render_progress_bar(percentage, risk_level):
+        color = "#22c55e" if risk_level == "Low Risk" else "#ffb100" if risk_level == "Medium Risk" else "#dc2626"
+        st.markdown(f"""
+        <div style="margin-top:1em">
+            <div style="font-weight:600; color:#fff; margin-bottom:0.3em;">📉 Probabilitas Resign: {percentage:.2f}%</div>
+            <div style="background-color:#334155; border-radius:6px; height:24px; width:100%;">
+                <div style="
+                    background-color:{color};
+                    width:{percentage}%;
+                    height:100%;
+                    border-radius:6px;
+                    text-align:right;
+                    padding-right:10px;
+                    color:white;
+                    font-weight:600;
+                    line-height:24px;
+                ">
+                    {percentage:.0f}%
+                </div>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
     render_progress_bar(y_proba_res * 100, risk_level)
     
