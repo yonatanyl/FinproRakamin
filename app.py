@@ -221,12 +221,22 @@ if submitted:
     with st.container():
         st.markdown("## 🔍 **Hasil Prediksi Karyawan**")
         st.markdown("---")
-        
-        col1, col2 = st.columns(2)
-        col1.metric("📉 Probabilitas Resign", f"{y_proba_res:.2%}")
-        col2.markdown(f"### {risk_color} **SEGMENTASI : {risk_level}**")
     
-        st.markdown("### 🧭 **Rekomendasi Tindakan**")
-        st.info(f"🕒 {training_recommendation}")
+        # layout kolom 2 bagian: kiri = Probabilitas, kanan = Segmentasi
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown("#### 📉 Probabilitas Resign")
+            st.markdown(f"<h2 style='color:white'>{y_proba_res:.2%}</h2>", unsafe_allow_html=True)
+    
+        with col2:
+            risk_color_emoji = "🟢" if risk_level == "Low" else "🟡" if risk_level == "Medium" else "🔴"
+            st.markdown("#### 🧩 Segmentasi Risiko")
+            st.markdown(f"<h4 style='color:white'>{risk_color_emoji} <b>{risk_level} Risk</b></h4>", unsafe_allow_html=True)
+    
+        st.markdown("---")
+        st.markdown("#### ⏱️ Rekomendasi Tindakan")
+        st.success(f"💡 {risk_level} – {training_recommendation}")
+
 
 
