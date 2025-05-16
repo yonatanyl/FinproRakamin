@@ -354,3 +354,22 @@ if submitted:
     
         📌 Dengan redistribusi ini, proporsi anggaran pelatihan kini **lebih mencerminkan prioritas retensi**.
         """)
+        import shap
+        # --- SHAP untuk pipeline ---
+        explainer = shap.Explainer(pipeline_model, df_model)
+        shap_values = explainer(df_model)
+        
+        # Ambil row prediksi yang barusan (pertama dan satu-satunya di batch ini)
+        shap_row = shap_values[0].values
+        
+        # Rank fitur berdasar kontribusi absolut (besar pengaruh)
+        top_idx = np.argsort(np.abs(shap_row))[::-1][:3]  # top 3 fitur
+        top_feats = [(df_model.columns[i], shap_row[i]) for i in top_idx]
+        
+        shap_markdown = "#### 🧠 Alasan Utama Prediksi:\n"
+        for fname, sval in top_feats:
+            arrow = "⬆️" if sval > 0 else "⬇️"
+            efek = "menaikkan risiko" if sval > 0 else "menurunkan risiko"
+            shap_markdown += f"- **{fname}** {arrow} {efek} (SHAP: {sval:.3f})\n"
+        st.info(shap_markdown)
+
