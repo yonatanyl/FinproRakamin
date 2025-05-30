@@ -275,6 +275,82 @@ with tab1:
     st.markdown("---")
     prediksi_btn_single = st.button("📊 Prediksi Karyawan Ini")
 
+# ------------------------------------------------------------------
+# 5b. UI : Upload Batch CSV untuk Batch Prediksi
+# ------------------------------------------------------------------
+st.markdown("## 🗂️ Batch Prediksi Resign via Upload CSV")
+uploaded_file = st.file_uploader("Upload file CSV (batch prediksi karyawan)", type=["csv"])
+
+if uploaded_file:
+    batch_df = pd.read_csv(uploaded_file)
+    st.write("### Data yang Diupload", batch_df.head())
+
+    # Kolom wajib (harus ada semua!)
+    required_cols = [
+        "city", "gender", "relevent_experience", "enrolled_university",
+        "education_level", "major_discipline", "experience", "last_new_job"
+    ]
+    missing = [c for c in required_cols if c not in batch_df.columns]
+    if missing:
+        st.error(f"CSV kolom kurang: {missing}. Harap perbaiki file upload!")
+    else:
+        # CDI kolom (otomatis)
+        batch_df["city_development_index"] = batch_df["city"].apply(lambda c: float(city_cdi_map.get(c, DEFAULT_CDI_FALLBACK)))
+        batch_df["experience_numeric"] = batch_df["experience"].apply(parse_experience)
+        batch_df["estimated_salary"] = batch_df.apply(lambda r: estimate_salary(r["education_level"], r["experience_numeric"]), axis=1)
+        batch_df["city_development_index"] = np.log1p(batch_df["city_development_index"])
+
+        # Imputasi nilai default jika ada missing value
+        for col, val in imputation_defaults.items():
+            if col in batch_df.columns:
+                batch_df[col] = batch_df[col].fillna(val)
+
+        # Encoding label
+        for col, enc in label_encoders.items():
+            if col in batch_df.columns:
+                try:
+                    batch_df[col] = enc.transform(batch_df[col])
+                except ValueError:
+                    batch_df[col] = enc.transform([enc.classes_[0]])[0]
+
+        # Pastikan urutan kolom sama seperti model
+        missing_cols = [c for c in model_cols if c not in batch_df.columns]
+        if missing_cols:
+            st.error(f"Kolom hilang di batch: {missing_cols}")
+        else:
+            X = batch_df[model_cols].astype(float).fillna(0)
+            y_pred = pipeline_model.predict(X)
+            y_proba_res = pipeline_model.predict_proba(X)[:, 1]
+
+            # Buat kolom hasil
+            batch_df['pred_resign'] = y_pred
+            batch_df['proba_resign'] = y_proba_res
+
+            def risk_label(p):
+                if p < 0.45:
+                    return "Low Risk"
+                elif p < 0.70:
+                    return "Medium Risk"
+                else:
+                    return "High Risk"
+            batch_df['risk_level'] = batch_df['proba_resign'].apply(risk_label)
+
+            # Tampilkan hasil ke user
+            st.write("### Hasil Prediksi Batch", batch_df[[
+                "city", "gender", "education_level", "experience",
+                "pred_resign", "proba_resign", "risk_level"
+            ]])
+
+            # Download hasil prediksi
+            csv_out = batch_df.to_csv(index=False)
+            st.download_button(
+                "⬇️ Download Hasil Batch Prediksi (CSV)",
+                csv_out,
+                file_name="batch_prediksi_resign.csv",
+                mime="text/csv"
+            )
+
+
     if prediksi_btn_single:
         raw_single = {
             "city": city,
