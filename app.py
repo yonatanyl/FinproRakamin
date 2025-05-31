@@ -458,6 +458,24 @@ with tab2:
                     display_cols_results = [col for col in results_df.columns if col not in ['Prediksi_Resign_Code']]
                     st.dataframe(results_df[display_cols_results], use_container_width=True)
 
+                    # === Tambahkan di sini, jangan lupa import matplotlib.pyplot as plt ===
+                    import matplotlib.pyplot as plt
+                    
+                    risk_counts = results_df['Segmentasi_Risiko'].value_counts().reindex(['Low Risk', 'Medium Risk', 'High Risk'], fill_value=0)
+                    risk_labels = ['Low Risk', 'Medium Risk', 'High Risk']
+                    risk_colors = ['#22c55e', '#ffb100', '#dc2626']
+                    
+                    fig, ax = plt.subplots(figsize=(5, 5))
+                    ax.pie(
+                        risk_counts, 
+                        labels=[f"{label} ({count})" for label, count in zip(risk_labels, risk_counts)], 
+                        autopct='%1.1f%%',
+                        colors=risk_colors,
+                        startangle=140
+                    )
+                    ax.set_title("Distribusi Segmentasi Risiko (Batch Prediction)", fontsize=13)
+                    st.pyplot(fig)
+                    # === Selesai pie chart ===
                     # Opsi download
                     csv_export = results_df.to_csv(index=False).encode('utf-8')
                     st.download_button(
