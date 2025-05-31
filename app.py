@@ -9,6 +9,7 @@ import joblib
 import json
 from pathlib import Path
 import re
+import matplotlib.pyplot as plt # <-- Pindahkan import ke sini
 
 # ------------------------------------------------------------------ #
 # 0. Konfigurasi halaman                                             #
@@ -161,61 +162,37 @@ def get_risk_level_and_recommendation(prob):
 def preprocess_batch_data(df_input, city_map, default_cdi, label_encs, impute_vals, model_feature_cols):
     df = df_input.copy()
 
-    # 0. Pastikan kolom dasar ada (jika ada kolom ID, bisa ditambahkan di sini)
-    #    Misalnya: df['employee_id'] = df.get('employee_id', df.index)
-
-    # 1. Imputation (berdasarkan imputation_values.pkl)
     for col, val in impute_vals.items():
         if col in df.columns:
             df[col] = df[col].fillna(val)
-        else: # Jika kolom yang perlu diimputasi tidak ada di CSV, buat dengan nilai default
+        else: 
             df[col] = val
 
-
-    # 2. Feature Engineering
-    # City Development Index: dapatkan dari map, lalu log transform
     df["city_development_index"] = df["city"].apply(lambda x: city_map.get(str(x), default_cdi))
     df["city_development_index"] = np.log1p(df["city_development_index"].astype(float))
-
-    # Experience
     df["experience_numeric"] = df["experience"].apply(parse_experience)
-    # Estimated Salary (opsional, tergantung apakah masuk model_cols)
+
     if "estimated_salary" in model_feature_cols or "estimated_salary" in impute_vals:
         df["estimated_salary"] = df.apply(lambda r: estimate_salary(r.get("education_level"), r.get("experience_numeric")), axis=1)
-        # Imputasi untuk estimated_salary jika masih ada NaN (misal karena education_level invalid)
         if "estimated_salary" in impute_vals and df["estimated_salary"].isnull().any():
-             df["estimated_salary"] = df["estimated_salary"].fillna(impute_vals["estimated_salary"])
+            df["estimated_salary"] = df["estimated_salary"].fillna(impute_vals["estimated_salary"])
 
-
-    # 3. Label Encoding
     for col, enc in label_encs.items():
         if col in df.columns:
-            df[col] = df[col].astype(str) # Pastikan tipe data string untuk encoder
-            # Handle unseen labels: transform known, replace unknown with encoding of a default class
+            df[col] = df[col].astype(str) 
             transformed_values = []
-            # Ambil kelas pertama sebagai default jika ada nilai yang tidak dikenal encoder
             default_transformed_value = enc.transform([enc.classes_[0]])[0] if len(enc.classes_) > 0 else 0
-
             for item in df[col]:
                 try:
                     transformed_values.append(enc.transform([item])[0])
-                except ValueError: # Unseen label
+                except ValueError: 
                     transformed_values.append(default_transformed_value)
             df[col] = transformed_values
-        # Jika kolom yang perlu di-encode tidak ada di CSV, tapi ada di model_cols,
-        # ini bisa jadi masalah. Idealnya semua kolom input ada.
-        # Atau, jika ini adalah kolom yang bisa di-default encode (misal gender default ke Male terencode)
-        # elif col in model_feature_cols:
-        #     df[col] = enc.transform([enc.classes_[0]])[0] # default ke kelas pertama terencode
-
-
-    # 4. Final column selection, ordering, and safety fillna
-    # Tambahkan kolom yang mungkin hilang dari CSV tapi dibutuhkan model, isi dengan 0 atau NaN
+    
     for m_col in model_feature_cols:
         if m_col not in df.columns:
-            df[m_col] = 0 # Atau np.nan jika ada proses fillna(0) global setelah ini
+            df[m_col] = 0 
             st.warning(f"Kolom '{m_col}' tidak ditemukan di CSV dan ditambahkan dengan nilai default 0.")
-
 
     df_processed = df[model_feature_cols].astype(float).fillna(0)
     return df_processed
@@ -226,7 +203,6 @@ def preprocess_batch_data(df_input, city_map, default_cdi, label_encs, impute_va
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
 st.markdown("---")
 
-# Gunakan tab untuk memisahkan prediksi tunggal dan batch
 tab1, tab2 = st.tabs(["👤 Prediksi Tunggal", "📂 Prediksi Batch dari CSV"])
 
 with tab1:
@@ -261,14 +237,9 @@ with tab1:
 
     with st.expander("📋 Lihat Ringkasan Input (Live Update)", expanded=False):
         st.table(pd.DataFrame([{
-            "Kota": city,
-            "CDI": f"{cdi_value:.3f}",
-            "Jenis Kelamin": gender,
-            "Pendidikan": education_level,
-            "Jurusan": major,
-            "Pengalaman": exp_str,
-            "Pengalaman Relevan": relevent_exp,
-            "Status Universitas": enrolled_uni,
+            "Kota": city, "CDI": f"{cdi_value:.3f}", "Jenis Kelamin": gender,
+            "Pendidikan": education_level, "Jurusan": major, "Pengalaman": exp_str,
+            "Pengalaman Relevan": relevent_exp, "Status Universitas": enrolled_uni,
             "Last New Job": last_new_job_str
         }]))
 
@@ -277,67 +248,47 @@ with tab1:
 
     if prediksi_btn_single:
         raw_single = {
-            "city": city,
-            "city_development_index": cdi_value, # Ini akan di-log-transform nanti
-            "gender": gender,
-            "relevent_experience": relevent_exp,
-            "enrolled_university": enrolled_uni,
-            "education_level": education_level,
-            "major_discipline": major,
-            "experience": exp_str,
-            "last_new_job": last_new_job_str,
+            "city": city, "city_development_index": cdi_value, "gender": gender,
+            "relevent_experience": relevent_exp, "enrolled_university": enrolled_uni,
+            "education_level": education_level, "major_discipline": major,
+            "experience": exp_str, "last_new_job": last_new_job_str,
         }
-
         df_single = pd.DataFrame([raw_single])
 
-        # Preprocessing for single input (mirip dengan preprocess_batch_data tapi untuk 1 baris)
-        # 1. Imputation (menggunakan imputation_defaults)
         for col, val in imputation_defaults.items():
             if col in df_single.columns:
                 df_single[col] = df_single[col].fillna(val)
-            # else: # Jika kolom yang perlu diimputasi tidak ada, tambahkan dengan nilai default
-            #    df_single[col] = val # Seharusnya raw_single sudah punya semua kolom dasar
 
-
-        # 2. Feature Engineering
-        df_single["city_development_index"] = np.log1p(df_single["city_development_index"].astype(float)) # CDI sudah ada, tinggal log
+        df_single["city_development_index"] = np.log1p(df_single["city_development_index"].astype(float))
         df_single["experience_numeric"] = df_single["experience"].apply(parse_experience)
         if "estimated_salary" in model_cols or "estimated_salary" in imputation_defaults:
             df_single["estimated_salary"] = df_single.apply(lambda r: estimate_salary(r["education_level"], r["experience_numeric"]), axis=1)
             if "estimated_salary" in imputation_defaults and df_single["estimated_salary"].isnull().any():
-                 df_single["estimated_salary"] = df_single["estimated_salary"].fillna(imputation_defaults["estimated_salary"])
+                df_single["estimated_salary"] = df_single["estimated_salary"].fillna(imputation_defaults["estimated_salary"])
 
-
-        # 3. Label Encoding
         for col, enc in label_encoders.items():
             if col in df_single.columns:
                 try:
                     df_single[col] = enc.transform(df_single[col].astype(str))
-                except ValueError: # Jika ada nilai yang tidak dikenal oleh encoder
+                except ValueError: 
                     st.warning(f"Nilai '{df_single[col].iloc[0]}' untuk kolom '{col}' tidak dikenali encoder. Menggunakan nilai default.")
-                    df_single[col] = enc.transform([enc.classes_[0]])[0] # Default ke kelas pertama
+                    df_single[col] = enc.transform([enc.classes_[0]])[0] 
 
-        # 4. Final column selection, ordering, and safety fillna
         missing_model_cols = [c for c in model_cols if c not in df_single.columns]
         if missing_model_cols:
             for m_col in missing_model_cols:
-                 df_single[m_col] = 0 # Atau nilai default lain yang sesuai
-                 st.warning(f"Kolom model '{m_col}' tidak ada dalam input dan diisi dengan 0.")
-
+                df_single[m_col] = 0 
+                st.warning(f"Kolom model '{m_col}' tidak ada dalam input dan diisi dengan 0.")
 
         df_model_single = df_single[model_cols].astype(float).fillna(0)
-
         st.write("### Debug: Fitur Akhir untuk Model (Tunggal)", df_model_single)
 
         y_pred_single = pipeline_model.predict(df_model_single)[0]
         y_proba_res_single = pipeline_model.predict_proba(df_model_single)[0][1]
-
         risk_level_single, training_recommendation_single = get_risk_level_and_recommendation(y_proba_res_single)
 
-        if y_pred_single == 1:
-            st.toast("⚠️ Karyawan diprediksi akan RESIGN!", icon="⚠️")
-        else:
-            st.toast("✅ Karyawan diprediksi TIDAK resign.", icon="✅")
+        if y_pred_single == 1: st.toast("⚠️ Karyawan diprediksi akan RESIGN!", icon="⚠️")
+        else: st.toast("✅ Karyawan diprediksi TIDAK resign.", icon="✅")
 
         risk_color_single = "#22c55e" if risk_level_single == "Low Risk" else "#ffb100" if risk_level_single == "Medium Risk" else "#dc2626"
         risk_emoji_single = "🟢" if risk_level_single == "Low Risk" else "🟧" if risk_level_single == "Medium Risk" else "🔴"
@@ -357,10 +308,9 @@ with tab1:
             <hr style="border: none; border-top: 2px solid #334155; margin: 1.3em 0;">
             <div style="font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 0.7em;">⏱️ Rekomendasi Tindakan</div>
             <div style="background: #334155; border-radius: 8px; padding: 0.8em 1.2em; color: #e0eefa; font-size: 18px; font-weight: 500; margin-bottom: 0.5em;">💡 {training_recommendation_single}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        </div>""", unsafe_allow_html=True)
 
-        def render_progress_bar(percentage, risk_level_text): # Renamed risk_level to risk_level_text to avoid conflict
+        def render_progress_bar(percentage, risk_level_text):
             color = "#22c55e" if risk_level_text == "Low Risk" else "#ffb100" if risk_level_text == "Medium Risk" else "#dc2626"
             st.markdown(f"""
             <div style="margin-top:1em">
@@ -383,13 +333,10 @@ with tab2:
     st.markdown("## 📤 Unggah CSV untuk Prediksi Batch")
     uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"])
 
-    # Tentukan kolom yang wajib ada di CSV
     REQUIRED_RAW_COLS_BATCH = [
         "city", "gender", "relevent_experience", "enrolled_university",
         "education_level", "major_discipline", "experience", "last_new_job"
-        # "employee_id" # Opsional, jika ingin ada ID di output
     ]
-    # Boleh tambahkan 'company_size', 'company_type' jika ada di model dan label_encoders
 
     if uploaded_file is not None:
         try:
@@ -397,7 +344,6 @@ with tab2:
             st.write("### Pratinjau Data CSV yang Diunggah (5 baris pertama):")
             st.dataframe(df_batch_raw.head())
 
-            # Validasi kolom wajib
             missing_csv_cols = [col for col in REQUIRED_RAW_COLS_BATCH if col not in df_batch_raw.columns]
             if missing_csv_cols:
                 st.error(f"File CSV yang diunggah kekurangan kolom berikut yang wajib ada: {', '.join(missing_csv_cols)}")
@@ -405,36 +351,24 @@ with tab2:
 
             if st.button("🚀 Proses Prediksi Batch untuk File CSV Ini"):
                 with st.spinner("Sedang memproses prediksi batch... Ini mungkin memakan waktu beberapa saat."):
-                    # Simpan kolom asli untuk output (misal employee_id jika ada)
                     output_cols_to_keep = [col for col in df_batch_raw.columns if col not in model_cols and col not in ["experience_numeric", "estimated_salary", "city_development_index"]]
-                    # jika ada kolom ID seperti 'employee_id', pastikan itu ada di output_cols_to_keep
                     if 'employee_id' in df_batch_raw.columns and 'employee_id' not in output_cols_to_keep:
-                         output_cols_to_keep.append('employee_id')
-                    elif 'enrollee_id' in df_batch_raw.columns and 'enrollee_id' not in output_cols_to_keep: #sesuai dataset awal
-                         output_cols_to_keep.append('enrollee_id')
-
+                        output_cols_to_keep.append('employee_id')
+                    elif 'enrollee_id' in df_batch_raw.columns and 'enrollee_id' not in output_cols_to_keep: 
+                        output_cols_to_keep.append('enrollee_id')
 
                     df_batch_processed = preprocess_batch_data(
-                        df_batch_raw,
-                        city_cdi_map,
-                        DEFAULT_CDI_FALLBACK,
-                        label_encoders,
-                        imputation_defaults,
-                        model_cols
+                        df_batch_raw, city_cdi_map, DEFAULT_CDI_FALLBACK,
+                        label_encoders, imputation_defaults, model_cols
                     )
-
                     st.write("### Debug: Fitur Akhir untuk Model (Batch)", df_batch_processed.head())
 
                     batch_predictions = pipeline_model.predict(df_batch_processed)
                     batch_probabilities = pipeline_model.predict_proba(df_batch_processed)[:, 1]
 
-                    # Siapkan DataFrame hasil
-                    results_df = df_batch_raw[output_cols_to_keep].copy() # Mulai dengan kolom non-fitur dari CSV asli
-                    
-                    # Jika tidak ada kolom ID yang unik, gunakan index sebagai ID sementara
+                    results_df = df_batch_raw[output_cols_to_keep].copy()
                     if not any(id_col in results_df.columns for id_col in ['employee_id', 'enrollee_id']):
                         results_df['Record_ID'] = results_df.index
-
 
                     results_df['Probabilitas_Resign'] = batch_probabilities
                     results_df['Prediksi_Resign_Code'] = batch_predictions
@@ -450,33 +384,38 @@ with tab2:
                     results_df['Segmentasi_Risiko'] = risk_levels_batch
                     results_df['Rekomendasi_Tindakan'] = recommendations_batch
                     
-                    # Tampilkan hasil
                     st.success("Prediksi batch selesai!")
                     st.write("### Hasil Prediksi Batch:")
                     
-                    # Pilih kolom yang ingin ditampilkan, bisa disesuaikan
                     display_cols_results = [col for col in results_df.columns if col not in ['Prediksi_Resign_Code']]
                     st.dataframe(results_df[display_cols_results], use_container_width=True)
 
-                    # === Tambahkan di sini, jangan lupa import matplotlib.pyplot as plt ===
-                    import matplotlib.pyplot as plt
+                    # --- PIE CHART SECTION ---
+                    st.markdown("---") # Pemisah visual
+                    st.write("#### Distribusi Segmentasi Risiko Karyawan (Batch)")
                     
                     risk_counts = results_df['Segmentasi_Risiko'].value_counts().reindex(['Low Risk', 'Medium Risk', 'High Risk'], fill_value=0)
-                    risk_labels = ['Low Risk', 'Medium Risk', 'High Risk']
-                    risk_colors = ['#22c55e', '#ffb100', '#dc2626']
+                    # risk_labels digunakan untuk memastikan urutan dan kelengkapan, sudah dicover oleh reindex
+                    # risk_labels = ['Low Risk', 'Medium Risk', 'High Risk'] 
+                    risk_colors = ['#22c55e', '#ffb100', '#dc2626'] # Low, Medium, High
                     
-                    fig, ax = plt.subplots(figsize=(5, 5))
-                    ax.pie(
-                        risk_counts, 
-                        labels=[f"{label} ({count})" for label, count in zip(risk_labels, risk_counts)], 
-                        autopct='%1.1f%%',
-                        colors=risk_colors,
-                        startangle=140
-                    )
-                    ax.set_title("Distribusi Segmentasi Risiko (Batch Prediction)", fontsize=13)
-                    st.pyplot(fig)
-                    # === Selesai pie chart ===
-                    # Opsi download
+                    if not risk_counts.empty:
+                        fig, ax = plt.subplots(figsize=(6, 5)) # Sedikit penyesuaian figsize
+                        ax.pie(
+                            risk_counts, 
+                            labels=[f"{label} ({count})" for label, count in zip(risk_counts.index, risk_counts)], 
+                            autopct='%1.1f%%',
+                            colors=risk_colors,
+                            startangle=90, # Mulai dari atas untuk Low Risk jika ada
+                            wedgeprops={'edgecolor': 'white'} # Garis tepi antar slice
+                        )
+                        # ax.set_title("Distribusi Segmentasi Risiko (Batch Prediction)", fontsize=13) # Judul dipindah ke st.write
+                        ax.axis('equal') # Pastikan pie chart bulat
+                        st.pyplot(fig)
+                    else:
+                        st.info("Tidak ada data risiko untuk ditampilkan dalam pie chart.")
+                    # --- END OF PIE CHART SECTION ---
+                                        
                     csv_export = results_df.to_csv(index=False).encode('utf-8')
                     st.download_button(
                         label="Unduh Hasil Prediksi Batch (CSV)",
