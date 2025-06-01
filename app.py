@@ -1,7 +1,3 @@
-# app.py
-# ---------------------------------------------------------------------
-# Aplikasi Streamlit: Prediksi Karyawan Resign
-# ---------------------------------------------------------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -9,15 +5,11 @@ import joblib
 import json
 from pathlib import Path
 import re
-import matplotlib.pyplot as plt # <-- Pindahkan import ke sini
-
-# ------------------------------------------------------------------ #
-# 0. Konfigurasi halaman                                             #
-# ------------------------------------------------------------------ #
+import matplotlib.pyplot as plt
 st.set_page_config(page_title="Prediksi Resign Karyawan", layout="wide", page_icon="💼")
 
 # ------------------------------------------------------------------ #
-# 1. Loader artefak                                                  #
+# 1. Loader                                                          #
 # ------------------------------------------------------------------ #
 @st.cache_resource(show_spinner="Memuat model …")
 def load_pipeline(path: str):
@@ -43,7 +35,7 @@ def load_city_mapping(path: str):
     return {}
 
 # ------------------------------------------------------------------ #
-# 2. Inisialisasi artefak                                            #
+# 2. Inisialisasi                                                    #
 # ------------------------------------------------------------------ #
 MODEL_PATH = "model_pipeline_logreg.pkl"
 ENCODER_PATH = "label_encoders.pkl"
@@ -93,7 +85,7 @@ def sort_education(values):
     }
     return sorted(values, key=lambda x: urutan.get(x, 999))
 
-city_options_keys = list(city_cdi_map.keys()) if city_cdi_map else ["city_103"] # Fallback if map empty
+city_options_keys = list(city_cdi_map.keys()) if city_cdi_map else ["city_103"]
 city_options = classes_or_fallback("city", sorted(city_options_keys))
 gender_options = classes_or_fallback("gender", ["Male", "Female", "Other"])
 relevent_exp_options = classes_or_fallback("relevent_experience", ["Has relevent experience", "No relevent experience"])
@@ -158,7 +150,6 @@ def get_risk_level_and_recommendation(prob):
         training_recommendation = "High Risk – 50% Segmentasi Alokasi Budget."
     return risk_level, training_recommendation
 
-# Fungsi untuk melakukan pra-pemrosesan pada DataFrame (untuk batch)
 def preprocess_batch_data(df_input, city_map, default_cdi, label_encs, impute_vals, model_feature_cols):
     df = df_input.copy()
 
@@ -198,7 +189,7 @@ def preprocess_batch_data(df_input, city_map, default_cdi, label_encs, impute_va
     return df_processed
 
 # ------------------------------------------------------------------ #
-# 5. UI : Form input (REFINED)                                       #
+# 5. UI : Form input                                                 #
 # ------------------------------------------------------------------ #
 st.title("💼 Prediksi Kemungkinan Karyawan Resign")
 st.markdown("---")
@@ -391,26 +382,23 @@ with tab2:
                     st.dataframe(results_df[display_cols_results], use_container_width=True)
 
                     # --- PIE CHART SECTION ---
-                    st.markdown("---") # Pemisah visual
+                    st.markdown("---")
                     st.write("#### Distribusi Segmentasi Risiko Karyawan (Batch)")
                     
                     risk_counts = results_df['Segmentasi_Risiko'].value_counts().reindex(['Low Risk', 'Medium Risk', 'High Risk'], fill_value=0)
-                    # risk_labels digunakan untuk memastikan urutan dan kelengkapan, sudah dicover oleh reindex
-                    # risk_labels = ['Low Risk', 'Medium Risk', 'High Risk'] 
-                    risk_colors = ['#22c55e', '#ffb100', '#dc2626'] # Low, Medium, High
+                    risk_colors = ['#22c55e', '#ffb100', '#dc2626']
                     
                     if not risk_counts.empty:
-                        fig, ax = plt.subplots(figsize=(6, 5)) # Sedikit penyesuaian figsize
+                        fig, ax = plt.subplots(figsize=(6, 5))
                         ax.pie(
                             risk_counts, 
                             labels=[f"{label} ({count})" for label, count in zip(risk_counts.index, risk_counts)], 
                             autopct='%1.1f%%',
                             colors=risk_colors,
-                            startangle=90, # Mulai dari atas untuk Low Risk jika ada
-                            wedgeprops={'edgecolor': 'white'} # Garis tepi antar slice
+                            startangle=90,
+                            wedgeprops={'edgecolor': 'white'}
                         )
-                        # ax.set_title("Distribusi Segmentasi Risiko (Batch Prediction)", fontsize=13) # Judul dipindah ke st.write
-                        ax.axis('equal') # Pastikan pie chart bulat
+                        ax.axis('equal')
                         st.pyplot(fig)
                     else:
                         st.info("Tidak ada data risiko untuk ditampilkan dalam pie chart.")
